@@ -37,7 +37,7 @@ var Params = template.Must(template.New("").Parse(`
 package {{.Pkg}}
 
 import(
-    {{range .Imports}}"{{.}}"{{end}}
+    {{range .Imports}} "{{.}}" {{println ""}} {{end}}
 
     httprequest "gopkg.in/httprequest.v1"
 )
