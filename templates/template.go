@@ -43,32 +43,34 @@ func WriteAll(outputDir string, args TemplateArg) error {
 }
 
 func Write(template *template.Template, data TemplateArg, filepath string) error {
-	// TODO: This is gross and broken. Find the proper way of adding required imports.
 	var args = struct {
 		TemplateArg
 		Imports []string
 	}{data, []string{}}
 
-Outer:
+	packagesToImport := make(map[string]bool)
+	typeToPackageMap := map[string]string{
+		"time.Time":       "time",
+		"*time.Time":      "time",
+		"json.RawMessage": "encoding/json",
+	}
+
 	for _, def := range data.Types {
-		if def.TypeStr == "time.Time" || def.TypeStr == "*time.Time" {
-			args.Imports = append(args.Imports, "time")
-			break Outer
+		name, ok := typeToPackageMap[def.TypeStr]
+		if ok {
+			packagesToImport[name] = true
 		}
-		if def.TypeStr == "json.RawMessage" || def.TypeStr == "*json.RawMessage" {
-			args.Imports = append(args.Imports, "encoding/json")
-			break Outer
-		}
+
 		for _, prop := range def.Properties {
-			if prop.TypeStr == "time.Time" || prop.TypeStr == "*time.Time" {
-				args.Imports = append(args.Imports, "time")
-				break Outer
-			}
-			if prop.TypeStr == "json.RawMessage" || prop.TypeStr == "*json.RawMessage" {
-				args.Imports = append(args.Imports, "encoding/json")
-				break Outer
+			name, ok := typeToPackageMap[prop.TypeStr]
+			if ok {
+				packagesToImport[name] = true
 			}
 		}
+	}
+
+	for k := range packagesToImport {
+		args.Imports = append(args.Imports, k)
 	}
 
 	var buf bytes.Buffer
