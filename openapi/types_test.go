@@ -57,6 +57,17 @@ var typesTestTable = []struct {
 	Type:     "boolean",
 	Expected: "bool",
 }, {
+	Type:     "object",
+	Format:   "map[string]string",
+	Expected: "map[string]string",
+}, {
+	Type:     "object",
+	Format:   "map[string]RandomType",
+	Expected: "interface{}",
+}, {
+	Type:     "object",
+	Expected: "interface{}",
+}, {
 	Type:     "unknown",
 	Expected: "interface{}",
 }}
